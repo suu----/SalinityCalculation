@@ -4,243 +4,291 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>調味料換算ツール</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .icon-calculator::before {
+            content: "🧮";
+            font-size: 1.5rem;
+        }
+        .icon-chef::before {
+            content: "👨‍🍳";
+            font-size: 2rem;
+        }
+    </style>
 </head>
 <body>
     <div id="root"></div>
     <script type="text/babel">
-const { useState, useEffect } = React;
-const { Calculator, ChefHat } = lucide;
+        const { useState, useEffect } = React;
 
-const SeasoningCalculator = () => {
-  const [dishVolume, setDishVolume] = useState(500);
-  const [targetConcentration, setTargetConcentration] = useState(1.0);
-  const [selectedSeasonings, setSelectedSeasonings] = useState([{ type: 'soy_sauce', ratio: 100 }]);
+        const SeasoningCalculator = () => {
+            const [dishVolume, setDishVolume] = useState(500);
+            const [targetConcentration, setTargetConcentration] = useState(1.0);
+            const [selectedSeasonings, setSelectedSeasonings] = useState([{ type: 'soy_sauce', ratio: 100 }]);
 
-  const seasonings = {
-    soy_sauce: { name: '濃口醤油', concentration: 15, density: 1.2, unit: 'ml' },
-    light_soy: { name: '薄口醤油', concentration: 18, density: 1.2, unit: 'ml' },
-    miso_red: { name: '赤味噌', concentration: 12, density: 1.3, unit: 'g' },
-    miso_white: { name: '白味噌', concentration: 6, density: 1.3, unit: 'g' },
-    salt: { name: '食塩', concentration: 100, density: 1.2, unit: 'g' }
-  };
+            const seasonings = {
+                soy_sauce: { name: '濃口醤油', concentration: 15, density: 1.2, unit: 'ml' },
+                light_soy: { name: '薄口醤油', concentration: 18, density: 1.2, unit: 'ml' },
+                miso_red: { name: '赤味噌', concentration: 12, density: 1.3, unit: 'g' },
+                miso_white: { name: '白味噌', concentration: 6, density: 1.3, unit: 'g' },
+                salt: { name: '食塩', concentration: 100, density: 1.2, unit: 'g' }
+            };
 
-  const presets = [
-    { name: '汁物', concentration: 0.8 },
-    { name: '煮物', concentration: 1.2 },
-    { name: '炒め物', concentration: 1.0 },
-    { name: '漬物', concentration: 2.0 },
-    { name: '和え物', concentration: 0.6 }
-  ];
+            const presets = [
+                { name: '汁物', concentration: 0.8 },
+                { name: '煮物', concentration: 1.2 },
+                { name: '炒め物', concentration: 1.0 },
+                { name: '漬物', concentration: 2.0 },
+                { name: '和え物', concentration: 0.6 }
+            ];
 
-  const calculateAmount = (seasoning, ratio) => {
-    const targetSalt = (dishVolume * targetConcentration) / 100;
-    const seasoningContribution = (targetSalt * ratio) / 100;
-    const seasoningAmount = (seasoningContribution * 100) / seasoning.concentration;
-    return seasoningAmount;
-  };
+            const calculateAmount = (seasoning, ratio) => {
+                const targetSalt = (dishVolume * targetConcentration) / 100;
+                const seasoningContribution = (targetSalt * ratio) / 100;
+                const seasoningAmount = (seasoningContribution * 100) / seasoning.concentration;
+                return seasoningAmount;
+            };
 
-  const convertToSpoons = (amount, unit, density) => {
-    // 重量ベースでの換算
-    let weightInG;
-    if (unit === 'ml') {
-      weightInG = amount * density;
-    } else {
-      weightInG = amount;
-    }
+            const convertToSpoons = (amount, unit, density) => {
+                let weightInG;
+                if (unit === 'ml') {
+                    weightInG = amount * density;
+                } else {
+                    weightInG = amount;
+                }
 
-    // 大さじ・小さじの重量基準値（調味料別）
-    const tablespoonWeight = 15 * density; // 大さじ1杯の重量
-    const teaspoonWeight = 5 * density;    // 小さじ1杯の重量
+                const tablespoonWeight = 15 * density;
+                const teaspoonWeight = 5 * density;
 
-    const tablespoons = Math.floor(weightInG / tablespoonWeight);
-    const remainingWeight = weightInG % tablespoonWeight;
-    const teaspoons = Math.floor(remainingWeight / teaspoonWeight);
-    const remainingFraction = ((remainingWeight % teaspoonWeight) / teaspoonWeight).toFixed(1);
+                const tablespoons = Math.floor(weightInG / tablespoonWeight);
+                const remainingWeight = weightInG % tablespoonWeight;
+                const teaspoons = Math.floor(remainingWeight / teaspoonWeight);
+                const remainingFraction = ((remainingWeight % teaspoonWeight) / teaspoonWeight).toFixed(1);
 
-    let result = [];
-    if (tablespoons > 0) result.push(`大さじ${tablespoons}`);
-    if (teaspoons > 0) result.push(`小さじ${teaspoons}`);
-    if (parseFloat(remainingFraction) > 0.1) result.push(`小さじ${remainingFraction}`);
+                let result = [];
+                if (tablespoons > 0) result.push(`大さじ${tablespoons}`);
+                if (teaspoons > 0) result.push(`小さじ${teaspoons}`);
+                if (parseFloat(remainingFraction) > 0.1) result.push(`小さじ${remainingFraction}`);
 
-    return result.length > 0 ? result.join(' + ') : '少々';
-  };
+                return result.length > 0 ? result.join(' + ') : '少々';
+            };
 
-  const addSeasoning = () => {
-    setSelectedSeasonings([...selectedSeasonings, { type: 'soy_sauce', ratio: 50 }]);
-  };
+            const addSeasoning = () => {
+                setSelectedSeasonings([...selectedSeasonings, { type: 'soy_sauce', ratio: 50 }]);
+            };
 
-  const removeSeasoning = (index) => {
-    if (selectedSeasonings.length > 1) {
-      const newSeasonings = selectedSeasonings.filter((_, i) => i !== index);
-      setSelectedSeasonings(newSeasonings);
-    }
-  };
+            const removeSeasoning = (index) => {
+                if (selectedSeasonings.length > 1) {
+                    const newSeasonings = selectedSeasonings.filter((_, i) => i !== index);
+                    setSelectedSeasonings(newSeasonings);
+                }
+            };
 
-  const updateSeasoningType = (index, type) => {
-    const newSeasonings = [...selectedSeasonings];
-    newSeasonings[index].type = type;
-    setSelectedSeasonings(newSeasonings);
-  };
+            const updateSeasoningType = (index, type) => {
+                const newSeasonings = [...selectedSeasonings];
+                newSeasonings[index].type = type;
+                setSelectedSeasonings(newSeasonings);
+            };
 
-  const updateSeasoningRatio = (index, ratio) => {
-    const newSeasonings = [...selectedSeasonings];
-    newSeasonings[index].ratio = ratio;
-    setSelectedSeasonings(newSeasonings);
-  };
+            const updateSeasoningRatio = (index, ratio) => {
+                const newSeasonings = [...selectedSeasonings];
+                newSeasonings[index].ratio = ratio;
+                setSelectedSeasonings(newSeasonings);
+            };
 
-  // 比率の合計を100%に正規化
-  useEffect(() => {
-    const totalRatio = selectedSeasonings.reduce((sum, s) => sum + s.ratio, 0);
-    if (totalRatio !== 100 && totalRatio > 0) {
-      const normalizedSeasonings = selectedSeasonings.map(s => ({
-        ...s,
-        ratio: Math.round((s.ratio / totalRatio) * 100)
-      }));
-      setSelectedSeasonings(normalizedSeasonings);
-    }
-  }, [selectedSeasonings]);
+            useEffect(() => {
+                const totalRatio = selectedSeasonings.reduce((sum, s) => sum + s.ratio, 0);
+                if (totalRatio !== 100 && totalRatio > 0) {
+                    const normalizedSeasonings = selectedSeasonings.map(s => ({
+                        ...s,
+                        ratio: Math.round((s.ratio / totalRatio) * 100)
+                    }));
+                    setSelectedSeasonings(normalizedSeasonings);
+                }
+            }, [selectedSeasonings]);
 
-  return React.createElement('div', { className: 'max-w-4xl mx-auto p-6 bg-white' },
-    React.createElement('div', { className: 'text-center mb-8' },
-      React.createElement('div', { className: 'flex items-center justify-center gap-2 mb-2' },
-        React.createElement(ChefHat, { className: 'w-8 h-8 text-orange-600' }),
-        React.createElement('h1', { className: 'text-3xl font-bold text-gray-800' }, '塩分濃度ベース調味料換算')
-      ),
-      React.createElement('p', { className: 'text-gray-600' }, '目標の塩分濃度に必要な調味料量を計算します')
-    ),
+            return (
+                <div className="max-w-4xl mx-auto p-6 bg-white min-h-screen">
+                    <div className="text-center mb-8">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                            <span className="icon-chef"></span>
+                            <h1 className="text-3xl font-bold text-gray-800">塩分濃度ベース調味料換算</h1>
+                        </div>
+                        <p className="text-gray-600">目標の塩分濃度に必要な調味料量を計算します</p>
+                    </div>
 
-    React.createElement('div', { className: 'grid md:grid-cols-2 gap-6' },
-      // 設定パネル
-      React.createElement('div', { className: 'space-y-6' },
-        // 料理量設定
-        React.createElement('div', { className: 'bg-gray-50 p-4 rounded-lg' },
-          React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, '料理の総量'),
-          React.createElement('div', { className: 'flex items-center gap-2' },
-            React.createElement('input', {
-              type: 'number',
-              value: dishVolume,
-              onChange: (e) => setDishVolume(Number(e.target.value)),
-              className: 'w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-            }),
-            React.createElement('span', { className: 'text-gray-600' }, 'ml/g')
-          )
-        ),
+                    <div className="grid md:grid-cols-2 gap-6">
+                        {/* 設定パネル */}
+                        <div className="space-y-6">
+                            {/* 料理量設定 */}
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    料理の総量
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="number"
+                                        value={dishVolume}
+                                        onChange={(e) => setDishVolume(Number(e.target.value))}
+                                        className="w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <span className="text-gray-600">ml/g</span>
+                                </div>
+                            </div>
 
-        // 目標塩分濃度設定
-        React.createElement('div', { className: 'bg-gray-50 p-4 rounded-lg' },
-          React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, '目標塩分濃度'),
-          React.createElement('div', { className: 'flex items-center gap-2 mb-3' },
-            React.createElement('input', {
-              type: 'number',
-              step: '0.1',
-              value: targetConcentration,
-              onChange: (e) => setTargetConcentration(Number(e.target.value)),
-              className: 'w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-            }),
-            React.createElement('span', { className: 'text-gray-600' }, '%')
-          ),
-          React.createElement('div', { className: 'flex flex-wrap gap-2' },
-            presets.map((preset) =>
-              React.createElement('button', {
-                key: preset.name,
-                onClick: () => setTargetConcentration(preset.concentration),
-                className: 'px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors'
-              }, `${preset.name} (${preset.concentration}%)`)
-            )
-          )
-        ),
+                            {/* 目標塩分濃度設定 */}
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    目標塩分濃度
+                                </label>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        value={targetConcentration}
+                                        onChange={(e) => setTargetConcentration(Number(e.target.value))}
+                                        className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <span className="text-gray-600">%</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {presets.map((preset) => (
+                                        <button
+                                            key={preset.name}
+                                            onClick={() => setTargetConcentration(preset.concentration)}
+                                            className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors"
+                                        >
+                                            {preset.name} ({preset.concentration}%)
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
 
-        // 調味料選択
-        React.createElement('div', { className: 'bg-gray-50 p-4 rounded-lg' },
-          React.createElement('div', { className: 'flex items-center justify-between mb-3' },
-            React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, '使用する調味料'),
-            React.createElement('button', {
-              onClick: addSeasoning,
-              className: 'px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors'
-            }, '+ 追加')
-          ),
-          
-          selectedSeasonings.map((seasoning, index) =>
-            React.createElement('div', { key: index, className: 'mb-3 p-3 bg-white rounded border' },
-              React.createElement('div', { className: 'flex items-center gap-2 mb-2' },
-                React.createElement('select', {
-                  value: seasoning.type,
-                  onChange: (e) => updateSeasoningType(index, e.target.value),
-                  className: 'flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500'
-                },
-                  Object.entries(seasonings).map(([key, s]) =>
-                    React.createElement('option', { key: key, value: key }, s.name)
-                  )
-                ),
-                selectedSeasonings.length > 1 && React.createElement('button', {
-                  onClick: () => removeSeasoning(index),
-                  className: 'px-2 py-1 text-red-600 hover:bg-red-50 rounded'
-                }, '×')
-              ),
-              selectedSeasonings.length > 1 && React.createElement('div', { className: 'flex items-center gap-2' },
-                React.createElement('label', { className: 'text-sm text-gray-600' }, '比率:'),
-                React.createElement('input', {
-                  type: 'range',
-                  min: '10',
-                  max: '90',
-                  value: seasoning.ratio,
-                  onChange: (e) => updateSeasoningRatio(index, Number(e.target.value)),
-                  className: 'flex-1'
-                }),
-                React.createElement('span', { className: 'text-sm text-gray-600 w-12' }, `${seasoning.ratio}%`)
-              )
-            )
-          )
-        )
-      ),
+                            {/* 調味料選択 */}
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <div className="flex items-center justify-between mb-3">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        使用する調味料
+                                    </label>
+                                    <button
+                                        onClick={addSeasoning}
+                                        className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                                    >
+                                        + 追加
+                                    </button>
+                                </div>
+                                
+                                {selectedSeasonings.map((seasoning, index) => (
+                                    <div key={index} className="mb-3 p-3 bg-white rounded border">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <select
+                                                value={seasoning.type}
+                                                onChange={(e) => updateSeasoningType(index, e.target.value)}
+                                                className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                {Object.entries(seasonings).map(([key, s]) => (
+                                                    <option key={key} value={key}>{s.name}</option>
+                                                ))}
+                                            </select>
+                                            {selectedSeasonings.length > 1 && (
+                                                <button
+                                                    onClick={() => removeSeasoning(index)}
+                                                    className="px-2 py-1 text-red-600 hover:bg-red-50 rounded"
+                                                >
+                                                    ×
+                                                </button>
+                                            )}
+                                        </div>
+                                        {selectedSeasonings.length > 1 && (
+                                            <div className="flex items-center gap-2">
+                                                <label className="text-sm text-gray-600">比率:</label>
+                                                <input
+                                                    type="range"
+                                                    min="10"
+                                                    max="90"
+                                                    value={seasoning.ratio}
+                                                    onChange={(e) => updateSeasoningRatio(index, Number(e.target.value))}
+                                                    className="flex-1"
+                                                />
+                                                <span className="text-sm text-gray-600 w-12">{seasoning.ratio}%</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
 
-      // 結果表示
-      React.createElement('div', { className: 'bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg' },
-        React.createElement('div', { className: 'flex items-center gap-2 mb-4' },
-          React.createElement(Calculator, { className: 'w-6 h-6 text-blue-600' }),
-          React.createElement('h2', { className: 'text-xl font-semibold text-gray-800' }, '必要な調味料量')
-        ),
-        
-        React.createElement('div', { className: 'space-y-4' },
-          selectedSeasonings.map((seasoning, index) => {
-            const seasoningData = seasonings[seasoning.type];
-            const amount = calculateAmount(seasoningData, seasoning.ratio);
-            const spoonConversion = convertToSpoons(amount, seasoningData.unit, seasoningData.density);
-            const displayWeight = seasoningData.unit === 'ml' ? amount * seasoningData.density : amount;
-            
-            return React.createElement('div', { key: index, className: 'bg-white p-4 rounded-lg border-l-4 border-blue-500' },
-              React.createElement('div', { className: 'flex items-center justify-between mb-2' },
-                React.createElement('h3', { className: 'font-medium text-gray-800' }, seasoningData.name),
-                selectedSeasonings.length > 1 && React.createElement('span', { className: 'text-sm text-gray-500' }, `${seasoning.ratio}%`)
-              ),
-              React.createElement('div', { className: 'space-y-1' },
-                React.createElement('div', { className: 'text-lg font-semibold text-blue-600' }, `${displayWeight.toFixed(1)} g`),
-                React.createElement('div', { className: 'text-sm text-gray-600' }, `= ${spoonConversion}`),
-                seasoningData.unit === 'ml' && React.createElement('div', { className: 'text-xs text-gray-500' }, `(${amount.toFixed(1)} ml)`)
-              )
+                        {/* 結果表示 */}
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg">
+                            <div className="flex items-center gap-2 mb-4">
+                                <span className="icon-calculator"></span>
+                                <h2 className="text-xl font-semibold text-gray-800">必要な調味料量</h2>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                {selectedSeasonings.map((seasoning, index) => {
+                                    const seasoningData = seasonings[seasoning.type];
+                                    const amount = calculateAmount(seasoningData, seasoning.ratio);
+                                    const spoonConversion = convertToSpoons(amount, seasoningData.unit, seasoningData.density);
+                                    const displayWeight = seasoningData.unit === 'ml' ? amount * seasoningData.density : amount;
+                                    
+                                    return (
+                                        <div key={index} className="bg-white p-4 rounded-lg border-l-4 border-blue-500">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h3 className="font-medium text-gray-800">{seasoningData.name}</h3>
+                                                {selectedSeasonings.length > 1 && (
+                                                    <span className="text-sm text-gray-500">{seasoning.ratio}%</span>
+                                                )}
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="text-lg font-semibold text-blue-600">
+                                                    {displayWeight.toFixed(1)} g
+                                                </div>
+                                                <div className="text-sm text-gray-600">
+                                                    = {spoonConversion}
+                                                </div>
+                                                {seasoningData.unit === 'ml' && (
+                                                    <div className="text-xs text-gray-500">
+                                                        ({amount.toFixed(1)} ml)
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="mt-6 p-4 bg-white rounded-lg border">
+                                <h3 className="font-medium text-gray-800 mb-2">計算結果サマリー</h3>
+                                <div className="text-sm text-gray-600 space-y-1">
+                                    <div>料理量: {dishVolume} ml/g</div>
+                                    <div>目標塩分濃度: {targetConcentration}%</div>
+                                    <div>必要な総塩分量: {((dishVolume * targetConcentration) / 100).toFixed(1)}g</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             );
-          })
-        ),
+        };
 
-        React.createElement('div', { className: 'mt-6 p-4 bg-white rounded-lg border' },
-          React.createElement('h3', { className: 'font-medium text-gray-800 mb-2' }, '計算結果サマリー'),
-          React.createElement('div', { className: 'text-sm text-gray-600 space-y-1' },
-            React.createElement('div', null, `料理量: ${dishVolume} ml/g`),
-            React.createElement('div', null, `目標塩分濃度: ${targetConcentration}%`),
-            React.createElement('div', null, `必要な総塩分量: ${((dishVolume * targetConcentration) / 100).toFixed(1)}g`)
-          )
-        )
-      )
-    )
-  );
-};
+        // DOMContentLoadedイベントを待つ
+        document.addEventListener('DOMContentLoaded', function() {
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(<SeasoningCalculator />);
+        });
 
-ReactDOM.render(React.createElement(SeasoningCalculator), document.getElementById('root'));
+        // フォールバック: DOMContentLoadedが既に発火している場合
+        if (document.readyState === 'loading') {
+            // まだ読み込み中の場合は上記のイベントリスナーで処理
+        } else {
+            // 既に読み込み済みの場合は即座に実行
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(<SeasoningCalculator />);
+        }
     </script>
 </body>
 </html>
