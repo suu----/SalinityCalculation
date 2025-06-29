@@ -12,9 +12,8 @@
 </head>
 <body>
     <div id="root"></div>
-    <script type="text/babel">
+    <script type="text/babel" data-presets="react">
         const { useState, useEffect } = React;
-        const { Calculator, ChefHat } = lucide;
 
         const SeasoningCalculator = () => {
           const [dishVolume, setDishVolume] = useState(500);
@@ -102,10 +101,23 @@
             }
           }, [selectedSeasonings]);
 
+          // アイコンコンポーネントの定義
+          const ChefHatIcon = () => (
+            <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4a2 2 0 00-2-2H8a2 2 0 00-2 2v2M6 6v12a2 2 0 002 2h8a2 2 0 002-2V6M6 6h12M10 10h4" />
+            </svg>
+          );
+
+          const CalculatorIcon = () => (
+            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+          );
+
           return React.createElement('div', { className: "max-w-4xl mx-auto p-6 bg-white" },
             React.createElement('div', { className: "text-center mb-8" },
               React.createElement('div', { className: "flex items-center justify-center gap-2 mb-2" },
-                React.createElement(ChefHat, { className: "w-8 h-8 text-orange-600" }),
+                React.createElement(ChefHatIcon),
                 React.createElement('h1', { className: "text-3xl font-bold text-gray-800" }, '塩分濃度ベース調味料換算')
               ),
               React.createElement('p', { className: "text-gray-600" }, '目標の塩分濃度に必要な調味料量を計算します')
@@ -199,7 +211,7 @@
               // 結果表示
               React.createElement('div', { className: "bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg" },
                 React.createElement('div', { className: "flex items-center gap-2 mb-4" },
-                  React.createElement(Calculator, { className: "w-6 h-6 text-blue-600" }),
+                  React.createElement(CalculatorIcon),
                   React.createElement('h2', { className: "text-xl font-semibold text-gray-800" }, '必要な調味料量')
                 ),
                 
